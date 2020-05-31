@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.clients.CommonClientConfigs;
+import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
@@ -51,11 +53,26 @@ public class KafkaStreamsConfig {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "mce-consuming-job");
         props.put(StreamsConfig.CLIENT_ID_CONFIG, "mce-consuming-job-client");
         // Where to find Kafka broker(s).
-        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBootstrapServer);
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,
+            com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_BOOTSTRAP_SERVER", kafkaBootstrapServer));
+        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
+        com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_URL", kafkaSchemaRegistryUrl));
+        if (!com.linkedin.util.Configuration.getEnvironmentVariable("SASL_JAAS_CONFIG", "").equals("")) {
+            props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_SECURITY_PROTOCOL", "SASL_SSL"));
+            props.put(SaslConfigs.SASL_MECHANISM,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_MECHANISM", SaslConfigs.DEFAULT_SASL_MECHANISM));
+            props.put(SaslConfigs.SASL_JAAS_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("SASL_JAAS_CONFIG"));
+        }
+        if (!com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_BASIC_AUTH_USER_INFO", "").equals("")) {
+            props.put(AbstractKafkaAvroSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+            props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_USER_INFO_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_BASIC_AUTH_USER_INFO"));
+        }
         // Specify default (de)serializers for record keys and for record values.
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, GenericAvroSerde.class.getName());
-        props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, kafkaSchemaRegistryUrl);
         // Continue handling events after exception
         props.put(StreamsConfig.DEFAULT_DESERIALIZATION_EXCEPTION_HANDLER_CLASS_CONFIG, LogAndContinueExceptionHandler.class);
         // Records will be flushed every 10 seconds.
