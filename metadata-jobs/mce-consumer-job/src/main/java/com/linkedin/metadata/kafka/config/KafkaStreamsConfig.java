@@ -57,13 +57,13 @@ public class KafkaStreamsConfig {
             com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_BOOTSTRAP_SERVER", kafkaBootstrapServer));
         props.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG,
         com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_URL", kafkaSchemaRegistryUrl));
-        if (!com.linkedin.util.Configuration.getEnvironmentVariable("SASL_JAAS_CONFIG", "").equals("")) {
+        if (!com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_JAAS_CONFIG", "").equals("")) {
             props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
                 com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_SECURITY_PROTOCOL", "SASL_SSL"));
             props.put(SaslConfigs.SASL_MECHANISM,
                 com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_MECHANISM", SaslConfigs.DEFAULT_SASL_MECHANISM));
             props.put(SaslConfigs.SASL_JAAS_CONFIG,
-                com.linkedin.util.Configuration.getEnvironmentVariable("SASL_JAAS_CONFIG"));
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_JAAS_CONFIG"));
         }
         if (!com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_BASIC_AUTH_USER_INFO", "").equals("")) {
             props.put(AbstractKafkaAvroSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
