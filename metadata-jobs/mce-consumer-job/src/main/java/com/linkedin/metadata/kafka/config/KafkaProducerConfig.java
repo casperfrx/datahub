@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -42,6 +44,19 @@ public class KafkaProducerConfig {
         producerConfigMap.put(ProducerConfig.CLIENT_ID_CONFIG, "failed-mce-producer");
         producerConfigMap.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerConfigMap.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, GenericAvroSerializer.class);
+        if (!com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_JAAS_CONFIG", "").equals("")) {
+            producerConfigMap.put(SaslConfigs.SASL_MECHANISM,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_MECHANISM", SaslConfigs.DEFAULT_SASL_MECHANISM));
+            producerConfigMap.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_SECURITY_PROTOCOL", "SASL_SSL"));
+            producerConfigMap.put(SaslConfigs.SASL_JAAS_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SASL_JAAS_CONFIG"));
+        }
+        if (!com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_BASIC_AUTH_USER_INFO", "").equals("")) {
+            producerConfigMap.put(AbstractKafkaAvroSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+            producerConfigMap.put(AbstractKafkaAvroSerDeConfig.SCHEMA_REGISTRY_USER_INFO_CONFIG,
+                com.linkedin.util.Configuration.getEnvironmentVariable("KAFKA_SCHEMAREGISTRY_BASIC_AUTH_USER_INFO"));
+        }
 
         return producerConfigMap;
     }
