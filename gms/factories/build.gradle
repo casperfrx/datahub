@@ -6,6 +6,7 @@ dependencies {
 
   compile externalDependency.elasticSearchRest
   compile externalDependency.kafkaSerializers
+  compile externalDependency.kafkaAvroSerde
   compile externalDependency.lombok
   compile externalDependency.servletApi
   compile externalDependency.springBeans
